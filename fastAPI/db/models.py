@@ -1,0 +1,109 @@
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, Boolean, Float, DateTime, func
+from sqlalchemy.orm import relationship
+from sqlalchemy_utils.types import ChoiceType
+from db.database import Base
+
+
+class Users(Base):
+    __tablename__ = 'auth_user'
+
+    id = Column(Integer, primary_key=True)
+    first_name = Column(String(30), nullable=True)
+    last_name = Column(String(30), nullable=True)
+    username = Column(String(50), unique=True, nullable=False)
+    email = Column(String(256), nullable=False)
+    password = Column(Text, nullable=False)
+    is_staff = Column(Boolean, default=False)
+    is_active = Column(Boolean, default=False)
+    is_superuser = Column(Boolean, default=False)
+    travel_category = relationship('TravelCategory', back_populates='author')
+    comments = relationship('Comments', back_populates='users')
+
+    def __repr__(self):
+        return self.email
+
+
+class Address(Base):
+    __tablename__ = 'webapps_address'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), nullable=False)
+    loking_count = Column(Integer, nullable=False, default=0)
+    created_date = Column(DateTime, default=func.now())
+    updated_date = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    places = relationship('Places', back_populates='address')
+
+    def __repr__(self):
+        return self.name
+
+
+class Places(Base):
+    __tablename__ = 'webapps_places'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50))
+    rating = Column(Integer, nullable=False, default=0)
+    address_id = Column(Integer, ForeignKey('webapps_address.id'), nullable=False)
+    created_date = Column(DateTime, default=func.now())
+    updated_date = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    address = relationship('Address', back_populates='places')
+    travels = relationship('Travels', back_populates='places')
+
+    def __repr__(self):
+        return self.name
+
+
+class TravelCategory(Base):
+    __tablename__ = 'webapps_travelcategory'
+
+    id = Column(Integer, primary_key=True)
+    author_id = Column(Integer, ForeignKey('auth_user.id'))
+    name = Column(String(50), nullable=False)
+    created_date = Column(DateTime, default=func.now())
+    updated_date = Column(DateTime, default=func.now(), onupdate=func.now())
+    author = relationship('Users', back_populates='travel_category')
+    travels = relationship('Travels', back_populates='travel_category')
+
+    def __repr__(self):
+        return self.name
+
+
+class Comments(Base):
+    __tablename__ = 'webapps_comments'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('auth_user.id'))
+    text = Column(Text, nullable=False)
+    reads_count = Column(Integer, nullable=False, default=0)
+    created_date = Column(DateTime, default=func.now())
+    updated_date = Column(DateTime, default=func.now(), onupdate=func.now())
+    users = relationship('Users', back_populates='comments')
+    travels = relationship('Travels', back_populates='comments')
+
+    def __repr__(self):
+        return self.text
+
+
+class Travels(Base):
+    __tablename__ = 'webapps_travels'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), nullable=False)
+    price = Column(Float)
+    price_type = Column(String(10), default='$')
+    description = Column(Text)
+    category_id = Column(Integer, ForeignKey('webapps_travelcategory.id'))
+    places_id = Column(Integer, ForeignKey('webapps_places.id'))
+    comments_id = Column(Integer, ForeignKey('webapps_comments.id'))
+    discount = Column(Float, default=0)
+    created_date = Column(DateTime, default=func.now())
+    updated_date = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    comments = relationship('Comments', back_populates='travels')
+    places = relationship('Places', back_populates='travels')
+    travel_category = relationship('TravelCategory', back_populates='travels')
+
+    def __repr__(self):
+        return self.name

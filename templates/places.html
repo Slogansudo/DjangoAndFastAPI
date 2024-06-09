@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+        <div>
+            {% for address in addresses %}
+            <div class="col-lg-4 col-md-6">
+                <div class="blog-item">
+                    <div class="blog-img">
+                    </div>
+                    <div class="blog-content border border-top-0 rounded-bottom p-4">
+                        <p>name: {{address.name}} </p>
+                        <p>created date: {{address.created_date}} </p>
+                        <p class="mb-3">last_updated: {{address.updated_date}} </p>
+                    </div>
+                    <br>
+                    <h1>----------------------------------------</h1><br>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+</body>
+</html>
